@@ -30,11 +30,8 @@ public class UC3InventorySetup {
         SingleRoom single = new SingleRoom();
         DoubleRoom doubleRoom = new DoubleRoom();
         SuiteRoom suite = new SuiteRoom();
-
         RoomInventory inventory = new RoomInventory();
-
         System.out.println("Hotel Room Inventory Status\n");
-
         System.out.println("Single Room:");
         single.displayRoomDetails();
         System.out.println("Available Rooms: " +
