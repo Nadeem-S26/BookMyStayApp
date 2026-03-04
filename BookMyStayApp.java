@@ -13,9 +13,6 @@ class Reservation {
     public String getGuestName() {
         return guestName;
     }
-    public String getRoomType() {
-        return roomType;
-    }
 }
 
 class BookingRequestQueue {
@@ -57,4 +54,3 @@ public class BookMyStayApp {
         }
     }
 }
-
