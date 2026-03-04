@@ -16,6 +16,9 @@ class Reservation {
     public String getRoomType() {
         return roomType;
     }
+    public String getroomType() {
+        return roomType;
+    }
 }
 
 class BookingRequestQueue {
