@@ -1,5 +1,7 @@
+
 import java.util.HashMap;
 import java.util.Map;
+
 abstract class Room {
     protected int numberOFBeds;
     protected int squareFeet;
@@ -30,6 +32,7 @@ class SuiteRoom extends Room{
         super(3, 750 , 5000.0);
     }
 }
+
 
 class RoomInventory {
 
@@ -82,3 +85,4 @@ public class BookMyStayApp {
             inventory.getRoomAvailability().get("Suite"));
     }
 }
+
