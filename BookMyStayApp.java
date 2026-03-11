@@ -14,7 +14,6 @@ class AddOnService {
         return cost;
     }
 }
-
 class AddOnServiceManager {
     private Map<String, List<AddOnService>> servicesByReservation;
     public AddOnServiceManager() {
