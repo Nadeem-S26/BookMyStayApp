@@ -56,7 +56,6 @@ class Reservation {
 }
 
 public class BookMyStayApp {
-
     public static void main(String[] args) {
         BookingHistory history = new BookingHistory();
         Reservation r1 = new Reservation("Alice", "Single");
