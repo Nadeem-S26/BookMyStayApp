@@ -55,7 +55,7 @@ class Reservation {
     }
 }
 
-public class BookMyStay {
+public class BookMyStayApp {
 
     public static void main(String[] args) {
         BookingHistory history = new BookingHistory();
