@@ -38,7 +38,7 @@ class AddOnServiceManager {
     }
 }
 
-public class BookMyStay {
+public class BookMyStayApp {
     public static void main(String[] args) {
         AddOnService breakfast = new AddOnService("Breakfast", 15.0);
         AddOnService spa = new AddOnService("Spa", 50.0);
