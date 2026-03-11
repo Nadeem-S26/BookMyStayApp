@@ -87,24 +87,18 @@ import java.util.*;
 public class BookMyStayApp {
 
     public static void main(String[] args) {
-
         RoomInventory inventory = new RoomInventory();
         RoomAllocationService allocator = new RoomAllocationService();
-
         Queue<Reservation> reservationQueue = new LinkedList<>();
-
         reservationQueue.add(new Reservation("Alice", "Single"));
         reservationQueue.add(new Reservation("Bob", "Double"));
         reservationQueue.add(new Reservation("Charlie", "Single"));
         reservationQueue.add(new Reservation("David", "Suite"));
-
         inventory.displayInventory();
-
         while (!reservationQueue.isEmpty()) {
             Reservation reservation = reservationQueue.poll();
             allocator.allocateRoom(reservation, inventory);
         }
-
         inventory.displayInventory();
     }
 }
