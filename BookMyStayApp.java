@@ -82,7 +82,6 @@ class Reservation {
     }
 }
 
-import java.util.*;
 
 public class BookMyStayApp {
 
