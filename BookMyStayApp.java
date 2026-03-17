@@ -1,13 +1,12 @@
 import java.util.*;
 
-public class BookMyStay {
+public class BookMyStayApp {
 
     public static void main(String[] args) {
 
         BookingRequestQueue bookingQueue = new BookingRequestQueue();
         RoomInventory inventory = new RoomInventory();
         RoomAllocationService allocationService = new RoomAllocationService();
-
         bookingQueue.addRequest(new Reservation("Abhi", "Single"));
         bookingQueue.addRequest(new Reservation("Vamathi", "Double"));
         bookingQueue.addRequest(new Reservation("Kural", "Suite"));
