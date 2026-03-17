@@ -1,72 +1,105 @@
+import java.io.*;
 import java.util.*;
 
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        System.out.println("Booking Cancellation");
+        String fileName = "system_state.dat";
 
-        RoomInventory inventory = new RoomInventory();
-        CancellationService cancellationService = new CancellationService();
+        RoomInventory inventory;
+        BookingHistory history;
 
-        String reservationId = "Single-1";
-        String roomType = "Single";
+        // Try loading saved data
+        PersistenceService persistence = new PersistenceService();
 
-        cancellationService.registerBooking(reservationId, roomType);
+        SystemState state = persistence.loadState(fileName);
 
-        cancellationService.cancelBooking(reservationId, inventory);
+        if (state == null) {
 
-        cancellationService.showRollbackHistory();
+            System.out.println("No saved data found. Starting fresh system.");
 
-        System.out.println();
-        System.out.println("Updated Single Room Availability: " + inventory.getAvailableRooms("Single"));
+            inventory = new RoomInventory();
+            history = new BookingHistory();
+
+        } else {
+
+            inventory = state.inventory;
+            history = state.history;
+
+            System.out.println("System state restored successfully.");
+        }
+
+        // Simulate bookings
+        Reservation r1 = new Reservation("Alice", "Single", "SI-1");
+        Reservation r2 = new Reservation("Bob", "Double", "DO-1");
+
+        history.addReservation(r1);
+        history.addReservation(r2);
+
+        inventory.bookRoom("Single");
+        inventory.bookRoom("Double");
+
+        System.out.println("\nCurrent Inventory:");
+        inventory.displayInventory();
+
+        // Save system state before shutdown
+        SystemState newState = new SystemState(inventory, history);
+        persistence.saveState(fileName, newState);
+
+        System.out.println("\nSystem state saved successfully.");
     }
 }
 
-class CancellationService {
+class PersistenceService {
 
-    private Stack<String> releasedRoomIds;
-    private Map<String, String> reservationRoomTypeMap;
+    public void saveState(String fileName, SystemState state) {
 
-    public CancellationService() {
-        releasedRoomIds = new Stack<>();
-        reservationRoomTypeMap = new HashMap<>();
-    }
+        try {
 
-    public void registerBooking(String reservationId, String roomType) {
-        reservationRoomTypeMap.put(reservationId, roomType);
-    }
+            ObjectOutputStream out = new ObjectOutputStream(
+                    new FileOutputStream(fileName));
 
-    public void cancelBooking(String reservationId, RoomInventory inventory) {
+            out.writeObject(state);
+            out.close();
 
-        String roomType = reservationRoomTypeMap.get(reservationId);
+        } catch (IOException e) {
 
-        if (roomType == null) {
-            System.out.println("Reservation not found.");
-            return;
+            System.out.println("Error saving system state.");
         }
-
-        inventory.restoreRoom(roomType);
-
-        releasedRoomIds.push(reservationId);
-
-        reservationRoomTypeMap.remove(reservationId);
-
-        System.out.println("Booking canceled successfully. Inventory restored for room type: " + roomType);
     }
 
-    public void showRollbackHistory() {
+    public SystemState loadState(String fileName) {
 
-        System.out.println();
-        System.out.println("Rollback History (Most Recent First):");
+        try {
 
-        for (String id : releasedRoomIds) {
-            System.out.println("Released Reservation ID: " + id);
+            ObjectInputStream in = new ObjectInputStream(
+                    new FileInputStream(fileName));
+
+            SystemState state = (SystemState) in.readObject();
+            in.close();
+
+            return state;
+
+        } catch (Exception e) {
+
+            return null;
         }
     }
 }
 
-class RoomInventory {
+class SystemState implements Serializable {
+
+    RoomInventory inventory;
+    BookingHistory history;
+
+    public SystemState(RoomInventory inventory, BookingHistory history) {
+        this.inventory = inventory;
+        this.history = history;
+    }
+}
+
+class RoomInventory implements Serializable {
 
     private Map<String, Integer> inventory;
 
@@ -74,16 +107,64 @@ class RoomInventory {
 
         inventory = new HashMap<>();
 
-        inventory.put("Single", 5);
-        inventory.put("Double", 3);
-        inventory.put("Suite", 2);
+        inventory.put("Single", 2);
+        inventory.put("Double", 2);
+        inventory.put("Suite", 1);
     }
 
-    public void restoreRoom(String roomType) {
-        inventory.put(roomType, inventory.get(roomType) + 1);
+    public void bookRoom(String roomType) {
+
+        if (inventory.getOrDefault(roomType, 0) > 0) {
+            inventory.put(roomType, inventory.get(roomType) - 1);
+        }
     }
 
-    public int getAvailableRooms(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
+    public void displayInventory() {
+
+        for (String type : inventory.keySet()) {
+            System.out.println(type + " : " + inventory.get(type));
+        }
+    }
+}
+
+class BookingHistory implements Serializable {
+
+    private List<Reservation> reservations;
+
+    public BookingHistory() {
+        reservations = new ArrayList<>();
+    }
+
+    public void addReservation(Reservation reservation) {
+        reservations.add(reservation);
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+}
+
+class Reservation implements Serializable {
+
+    private String guestName;
+    private String roomType;
+    private String roomId;
+
+    public Reservation(String guestName, String roomType, String roomId) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+        this.roomId = roomId;
+    }
+
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public String getRoomId() {
+        return roomId;
     }
 }
