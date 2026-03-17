@@ -1,37 +1,107 @@
 import java.util.*;
 
-class BookingHistory {
-    private List<Reservation> confirmedReservations;
-    public BookingHistory() {
-        confirmedReservations = new ArrayList<>();
-    }
-    public void addReservation(Reservation reservation) {
-        confirmedReservations.add(reservation);
-    }
-    public List<Reservation> getConfirmedReservations() {
-        return confirmedReservations;
+public class BookMyStayApp{
+
+    public static void main(String[] args) {
+
+        System.out.println("Booking Validation");
+
+        Scanner scanner = new Scanner(System.in);
+
+        RoomInventory inventory = new RoomInventory();
+        ReservationValidator validator = new ReservationValidator();
+        BookingRequestQueue bookingQueue = new BookingRequestQueue();
+
+        try {
+
+            System.out.print("Enter guest name: ");
+            String guestName = scanner.nextLine();
+
+            System.out.print("Enter room type (Single/Double/Suite): ");
+            String roomType = scanner.nextLine();
+
+            validator.validate(guestName, roomType, inventory);
+
+            Reservation reservation = new Reservation(guestName, roomType);
+            bookingQueue.addRequest(reservation);
+
+            System.out.println("Booking request added successfully");
+
+        } catch (InvalidBookingException e) {
+
+            System.out.println("Booking failed: " + e.getMessage());
+
+        } finally {
+
+            scanner.close();
+        }
     }
 }
 
-class BookingReportService {
-    public void generateReport(BookingHistory history) {
-        List<Reservation> reservations = history.getConfirmedReservations();
-        System.out.println("Booking Report");
-        System.out.println("----------------");
-        for (Reservation r : reservations) {
-            System.out.println("Guest: " + r.getGuestName());
-            System.out.println("Room Type: " + r.getRoomType());
-            System.out.println("Room ID: " + r.getRoomId());
-            System.out.println();
+class InvalidBookingException extends Exception {
+
+    public InvalidBookingException(String message) {
+        super(message);
+    }
+}
+
+class ReservationValidator {
+
+    public void validate(String guestName, String roomType, RoomInventory inventory) throws InvalidBookingException {
+
+        if (guestName == null || guestName.trim().isEmpty()) {
+            throw new InvalidBookingException("Guest name cannot be empty.");
         }
-        System.out.println("Total Reservations: " + reservations.size());
+
+        if (!roomType.equals("Single") && !roomType.equals("Double") && !roomType.equals("Suite")) {
+            throw new InvalidBookingException("Invalid room type selected.");
+        }
+
+        if (!inventory.isAvailable(roomType)) {
+            throw new InvalidBookingException("Selected room type is not available.");
+        }
+    }
+}
+
+class RoomInventory {
+
+    private Map<String, Integer> inventory;
+
+    public RoomInventory() {
+
+        inventory = new HashMap<>();
+
+        inventory.put("Single", 2);
+        inventory.put("Double", 2);
+        inventory.put("Suite", 1);
+    }
+
+    public boolean isAvailable(String roomType) {
+        return inventory.getOrDefault(roomType, 0) > 0;
+    }
+}
+
+class BookingRequestQueue {
+
+    private Queue<Reservation> queue;
+
+    public BookingRequestQueue() {
+        queue = new LinkedList<>();
+    }
+
+    public void addRequest(Reservation reservation) {
+        queue.add(reservation);
+    }
+
+    public Reservation getNextRequest() {
+        return queue.poll();
     }
 }
 
 class Reservation {
+
     private String guestName;
     private String roomType;
-    private String roomId
 
     public Reservation(String guestName, String roomType) {
         this.guestName = guestName;
@@ -44,30 +114,5 @@ class Reservation {
 
     public String getRoomType() {
         return roomType;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-}
-
-public class BookMyStayApp {
-    public static void main(String[] args) {
-        BookingHistory history = new BookingHistory();
-        Reservation r1 = new Reservation("Alice", "Single");
-        r1.setRoomId("SI-1");
-        Reservation r2 = new Reservation("Bob", "Double");
-        r2.setRoomId("DO-1");
-        Reservation r3 = new Reservation("Charlie", "Suite");
-        r3.setRoomId("SU-1");
-        history.addReservation(r1);
-        history.addReservation(r2);
-        history.addReservation(r3);
-        BookingReportService reportService = new BookingReportService();
-        reportService.generateReport(history);
     }
 }
