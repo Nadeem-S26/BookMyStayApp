@@ -68,7 +68,6 @@ class ConcurrentBookingProcessor implements Runnable {
             }
         }
     }
-}
 
 class BookingRequestQueue {
 
@@ -143,16 +142,20 @@ class Reservation {
     private String guestName;
     private String roomType;
 
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+        releasedRoomIds.push(reservationId);
+
+        reservationRoomTypeMap.remove(reservationId);
+
+        System.out.println("Booking canceled successfully. Inventory restored for room type: " + roomType);
     }
 
-    public String getGuestName() {
-        return guestName;
-    }
+    public void showRollbackHistory() {
 
-    public String getRoomType() {
-        return roomType;
+        System.out.println();
+        System.out.println("Rollback History (Most Recent First):");
+
+        for (String id : releasedRoomIds) {
+            System.out.println("Released Reservation ID: " + id);
+        }
     }
 }
