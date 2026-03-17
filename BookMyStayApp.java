@@ -31,7 +31,7 @@ class BookingReportService {
 class Reservation {
     private String guestName;
     private String roomType;
-    private String roomId
+    private String roomId;
 
     public Reservation(String guestName, String roomType) {
         this.guestName = guestName;
