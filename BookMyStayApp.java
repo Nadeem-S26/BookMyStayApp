@@ -1,73 +1,89 @@
 import java.util.*;
 
-class BookingHistory {
-    private List<Reservation> confirmedReservations;
-    public BookingHistory() {
-        confirmedReservations = new ArrayList<>();
-    }
-    public void addReservation(Reservation reservation) {
-        confirmedReservations.add(reservation);
-    }
-    public List<Reservation> getConfirmedReservations() {
-        return confirmedReservations;
-    }
-}
-
-class BookingReportService {
-    public void generateReport(BookingHistory history) {
-        List<Reservation> reservations = history.getConfirmedReservations();
-        System.out.println("Booking Report");
-        System.out.println("----------------");
-        for (Reservation r : reservations) {
-            System.out.println("Guest: " + r.getGuestName());
-            System.out.println("Room Type: " + r.getRoomType());
-            System.out.println("Room ID: " + r.getRoomId());
-            System.out.println();
-        }
-        System.out.println("Total Reservations: " + reservations.size());
-    }
-}
-
-class Reservation {
-    private String guestName;
-    private String roomType;
-    private String roomId
-
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-    }
-
-    public String getGuestName() {
-        return guestName;
-    }
-
-    public String getRoomType() {
-        return roomType;
-    }
-
-    public String getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
-    }
-}
-
 public class BookMyStayApp {
+
     public static void main(String[] args) {
-        BookingHistory history = new BookingHistory();
-        Reservation r1 = new Reservation("Alice", "Single");
-        r1.setRoomId("SI-1");
-        Reservation r2 = new Reservation("Bob", "Double");
-        r2.setRoomId("DO-1");
-        Reservation r3 = new Reservation("Charlie", "Suite");
-        r3.setRoomId("SU-1");
-        history.addReservation(r1);
-        history.addReservation(r2);
-        history.addReservation(r3);
-        BookingReportService reportService = new BookingReportService();
-        reportService.generateReport(history);
+
+        System.out.println("Booking Cancellation");
+
+        RoomInventory inventory = new RoomInventory();
+        CancellationService cancellationService = new CancellationService();
+
+        String reservationId = "Single-1";
+        String roomType = "Single";
+
+        cancellationService.registerBooking(reservationId, roomType);
+
+        cancellationService.cancelBooking(reservationId, inventory);
+
+        cancellationService.showRollbackHistory();
+
+        System.out.println();
+        System.out.println("Updated Single Room Availability: " + inventory.getAvailableRooms("Single"));
+    }
+}
+
+class CancellationService {
+
+    private Stack<String> releasedRoomIds;
+    private Map<String, String> reservationRoomTypeMap;
+
+    public CancellationService() {
+        releasedRoomIds = new Stack<>();
+        reservationRoomTypeMap = new HashMap<>();
+    }
+
+    public void registerBooking(String reservationId, String roomType) {
+        reservationRoomTypeMap.put(reservationId, roomType);
+    }
+
+    public void cancelBooking(String reservationId, RoomInventory inventory) {
+
+        String roomType = reservationRoomTypeMap.get(reservationId);
+
+        if (roomType == null) {
+            System.out.println("Reservation not found.");
+            return;
+        }
+
+        inventory.restoreRoom(roomType);
+
+        releasedRoomIds.push(reservationId);
+
+        reservationRoomTypeMap.remove(reservationId);
+
+        System.out.println("Booking canceled successfully. Inventory restored for room type: " + roomType);
+    }
+
+    public void showRollbackHistory() {
+
+        System.out.println();
+        System.out.println("Rollback History (Most Recent First):");
+
+        for (String id : releasedRoomIds) {
+            System.out.println("Released Reservation ID: " + id);
+        }
+    }
+}
+
+class RoomInventory {
+
+    private Map<String, Integer> inventory;
+
+    public RoomInventory() {
+
+        inventory = new HashMap<>();
+
+        inventory.put("Single", 5);
+        inventory.put("Double", 3);
+        inventory.put("Suite", 2);
+    }
+
+    public void restoreRoom(String roomType) {
+        inventory.put(roomType, inventory.get(roomType) + 1);
+    }
+
+    public int getAvailableRooms(String roomType) {
+        return inventory.getOrDefault(roomType, 0);
     }
 }
