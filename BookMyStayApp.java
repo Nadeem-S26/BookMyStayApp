@@ -49,7 +49,6 @@ public class BookMyStayApp {
 
         System.out.println("\nSystem state saved successfully.");
     }
-}
 
 class PersistenceService {
 
@@ -85,6 +84,15 @@ class PersistenceService {
 
             return null;
         }
+
+        int number = roomCounters.getOrDefault(roomType, 0) + 1;
+        roomCounters.put(roomType, number);
+
+        String roomId = roomType + "-" + number;
+
+        inventory.bookRoom(roomType);
+
+        System.out.println("Booking confirmed for Guest: " + reservation.getGuestName() + ", Room ID: " + roomId);
     }
 }
 
@@ -104,7 +112,6 @@ class RoomInventory implements Serializable {
     private Map<String, Integer> inventory;
 
     public RoomInventory() {
-
         inventory = new HashMap<>();
 
         inventory.put("Single", 2);
@@ -166,5 +173,28 @@ class Reservation implements Serializable {
 
     public String getRoomId() {
         return roomId;
+    }
+}
+
+class Reservation {
+
+    private String guestName;
+    private String roomType;
+
+        releasedRoomIds.push(reservationId);
+
+        reservationRoomTypeMap.remove(reservationId);
+
+        System.out.println("Booking canceled successfully. Inventory restored for room type: " + roomType);
+    }
+
+    public void showRollbackHistory() {
+
+        System.out.println();
+        System.out.println("Rollback History (Most Recent First):");
+
+        for (String id : releasedRoomIds) {
+            System.out.println("Released Reservation ID: " + id);
+        }
     }
 }
